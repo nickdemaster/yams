@@ -6,21 +6,21 @@ YAMS was built to run on as many Linux based operating machines, as quickly as p
 
 
 The list of binaries it uses are below:
-bash
-which
-echo
-hash
-dmidecode [optional]
-awk
-uniq
-sed
-uname
-cat
-lsb_release [optional]
-free
-grep
-df
-ip addr
-netstat
-mysql [optional]
+- bash
+- which
+- echo
+- hash
+- dmidecode [optional]
+- awk
+- uniq
+- sed
+- uname
+- cat
+- lsb_release [optional]
+- free
+- grep
+- df
+- ip addr
+- netstat
+- mysql [optional]
 
