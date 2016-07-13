@@ -14,15 +14,18 @@ Well, yes.. but if you want to be able to quickly deploy a deep information gath
 You need to do the following a linux client that you want to gather information from, a webserver running PHP, a MySQL database.
 
 ### Your code is ugly and full of bugs
-That's why I posted it here - so you can fix them for me.. Thanks!  But seriously, this is an internal tool I use.
+That's why I posted it here - so you can fix them for me.. Thanks!  But seriously, this is an internal tool I use and I will accept all feedback/bug requests.
 
 ### Why did you pick MySQL/PHP/etc?
 I wrote this in a weekend - I picked the things I was familiar with, however, it is a project of mine to port each of the components to other languages.  But feel free to go nuts and submit pull requests.
 
 ### How does the analytics piece work?
 Once you have all the information in the MySQL database, you can either query it directly for information if you are a SQL ninja, or you can use the metric_export/import and import your data into influxDB.  I use grafana for visualizations.
- 
 
+### How large does the database grow?
+That's the next thought - IME, I have a little over 100 hosts, pushing information once a day - for 3 MySQL instance per host.  There are some tricks done that help keep duplicated information not in the database, however, there is more work to be done here.  For 6 months of running, the database is just over 1GB. But, YMMV.
+ 
+### Addendum
 
 The list of binaries it uses are below:
 - bash
