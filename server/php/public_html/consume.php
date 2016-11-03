@@ -18,84 +18,54 @@ ini_set('post_max_size', '10M');
 ini_set('max_input_time', 300);
 ini_set('max_execution_time', 300);
 
-include '../internal/db.connect.php';
+include '../internal/internal.php';
+
 
 $posthost = $_SERVER['REMOTE_ADDR'];
-
-error_log('getting headers');
-
+//error_log('getting headers');
 $headers = array();
 foreach ($_SERVER as $key => $value) {
     if (strpos($key, 'HTTP_') === 0) {
         $headers[str_replace(' ', '', ucwords(str_replace('_', ' ', strtolower(substr($key, 5)))))] = $value;
     }
 }
-
-error_log('headers_done');
+//error_log('headers_done');
 //print_r($headers);
  
 function is_json($string,$return_data = false) {
   $data = json_decode($string);
      return (json_last_error() == JSON_ERROR_NONE) ? ($return_data ? $data : TRUE) : FALSE;
 }
-
-error_log('checking file');
-
-error_log($_POST['file']);
-
+//error_log('checking file');
+//error_log($_POST['file']);
 if (!isset($_POST['file'])) {error_log('php-myinv: ('. $posthost. ') [ERROR] POST not sufficiently authenticated - file not set'); exit(header("Status: 200 OK"));}
-
-error_log('file set, moving on');
-
-
+//error_log('file set, moving on');
 // checks if valid json, if not die
 $response = is_json($_POST['file'], false);
-
-error_log($response);
-
-if ( $response != 1) {error_log('php-myinv: ('. $posthost. ') [ERROR] POST not sufficiently authenticated'); exit(header("Status: 200 OK"));} else {$json = json_decode($_POST['file'], true);}
-
-
-
+//error_log($response);
+if ( $response != 1) {error_log('php-myinv: ('. $posthost. ') [ERROR] POST not sufficiently authenticated - not valid'); exit(header("Status: 200 OK"));} else {$json = json_decode($_POST['file'], true);}
 $json_host_name = $json['server_stats']['hostname'];
-
 // header legend priority
 //  k1: explicit apikey
 //  a1: base64 for hostname, check if decoded value matches $json['server_stats']['hostname'];
 //  d1: location
-
-
-error_log($headers['Xa1']);
-error_log($headers['Xd1']);
-error_log($headers['Xk1']);
-
+//error_log($headers['Xa1']);
+//error_log($headers['Xd1']);
+//error_log($headers['Xk1']);
 if (!isset($headers['Xa1'])) {error_log('php-myinv: ('. $posthost. ') [ERROR] POST not sufficiently authenticated'); exit(header("Status: 200 OK"));}
 if (!isset($headers['Xd1'])) {error_log('php-myinv: ('. $posthost. ') [ERROR] POST not sufficiently authenticated'); exit(header("Status: 200 OK"));}
 if (!isset($headers['Xk1'])) {error_log('php-myinv: ('. $posthost. ') [ERROR] POST not sufficiently authenticated'); exit(header("Status: 200 OK"));}
-
 // check if base64 hostheader
-
 $base64_host_name = preg_replace('/[\r\n]+/', '', base64_decode($headers['Xa1']));
-
 //error_log($base64_host_name;
-
-
 //error_log('base64 length:' . strlen($base64_host_name) . PHP_EOL;
 //error_log('json length: ' .strlen($json_host_name) . PHP_EOL;
-
-
-error_log($apikey);
-
+//error_log($apikey);
 //error_log($json_host_name . PHP_EOL;
-
 if ($headers['Xk1'] !== $apikey) {error_log('php-myinv: ('. $posthost. ') [ERROR] POST not sufficiently authenticated'); exit(header("Status: 200 OK"));}
 if ($base64_host_name !== $json_host_name) {error_log('php-myinv: ('. $posthost. ') [ERROR] POST not sufficiently authenticated'); exit(header("Status: 200 OK"));}
-
-
 $datacenter = $headers['Xd1'];
-
    
-
     $dc_select_sql = "select id from datacenter where name = ?;";
 	
 	$dc_select = $link->prepare($dc_select_sql);
@@ -107,10 +77,7 @@ $datacenter = $headers['Xd1'];
 	while($row = $result->fetch_assoc()){
 	  $datacenter_id=$row['id'];
     }
-
     if (!isset($datacenter_id)) {return;}
-
-
     // get base stats
     
 	$json_poll_time = $json['server_stats']['poll_time'];
@@ -138,13 +105,10 @@ $datacenter = $headers['Xd1'];
 	//$hostname_select->store_result();
 	$numrows = $result->num_rows;
 	$hostname_select->free_result();	
-
     ////error_log($numrows;
-
     while($row = $result->fetch_assoc()){
 	  $host_id=$row['id'];
     }
-
 // if host_id is not set, insert host information into database and get insert id
 if ($numrows == 0) {
     
@@ -157,12 +121,10 @@ if ($numrows == 0) {
 	$hostname_insert->execute();
 	$host_id = $hostname_insert->insert_id;
 	$hostname_insert->free_result();
-
     //error_log('host inserted - new host id: '.$host_id. PHP_EOL;
 	
 	
 } else {
-
     // if host exists, get current settings with this select.
 	
 	//error_log("host found... checking rows" . PHP_EOL;
@@ -176,7 +138,6 @@ if ($numrows == 0) {
 	$host_variables->free_result();
 	
 	while($row = $result->fetch_assoc()){
-
         $current_name = $row['name'];
         $current_system_manufacturer = $row['system_manufacturer'];
         $current_system_product_name = $row['system_product_name']; 
@@ -221,7 +182,6 @@ if ($numrows == 0) {
 				$hostname_insert->bind_param('iissssssssssss', $host_id, $datacenter_id, $current_host_name, $current_system_manufacturer, $current_system_product_name, $current_system_serial_number, $current_cpu_model, $current_platform, $current_distribution, $current_description, $current_release, $current_kernel, $current_codename, $current_poll_time);
 				$hostname_insert->execute();
 				$hostname_insert->free_result();
-
         
 		 	//error_log("updating host entry" . PHP_EOL;
 		 
@@ -234,13 +194,9 @@ if ($numrows == 0) {
 				$hostname_insert->free_result();
 			
 			}
-
     } // end while 
-
 }  // end else
-
 //error_log("host done" . PHP_EOL;
-
 //error_log("starting memory" . PHP_EOL;
 	// get memory usage
 	
@@ -316,12 +272,9 @@ if ($numrows == 0) {
 		}
 	   
 	}
-
 //error_log("memory done... " . PHP_EOL;
 // disk information
-
 //error_log("starting disks" . PHP_EOL;
-
 foreach ($json['disk']  as $parent => $child) {
 	foreach ($child as $k => $v) {
 		
@@ -402,16 +355,10 @@ foreach ($json['disk']  as $parent => $child) {
 	     	
 	}
 }
-
 //error_log("disks done" . PHP_EOL;
-
 // end disk information
-
-
 //
-
 //error_log("memory modules start" . PHP_EOL;
-
 foreach ($json['memory_modules']  as $parent => $child) {
 	foreach ($child as $k => $v) {
 	 $locator = $k;
@@ -508,14 +455,10 @@ foreach ($json['memory_modules']  as $parent => $child) {
 	 
 	 
 	}
-
  //error_log("memory modules done...  " . PHP_EOL;
 //
-
-
 //
 //error_log("starting network...  " . PHP_EOL;
-
 foreach ($json['network']  as $parent => $child) {
 	foreach ($child as $k => $v) {
 		
@@ -611,16 +554,17 @@ foreach ($json['network']  as $parent => $child) {
 	 
 	 
 	}
-
-
 //
-
   
 foreach ($json['mysql']  as $parent => $child) {
 	foreach ($child as $k => $v) {
 	   
 	   // set instance
 	   //print_r ($host_id) .PHP_EOL ;
+	   
+
+	   
+	   // bind address
 	   
 	   if (isset($v['mysql_variables']['0']['bind_address'])) {
 		  	 $mysql_bind_address = $v['mysql_variables']['0']['bind_address'];
@@ -678,7 +622,6 @@ foreach ($json['mysql']  as $parent => $child) {
 	      //error_log('instance_id: ' . $instance_id);
 	       
 	       	   if ( $key == 'mysql_variables') { 
-
 				foreach ($value as $a => $b) {
 	       		  
 	       		    foreach ($b as $c => $d) {
@@ -770,7 +713,6 @@ foreach ($json['mysql']  as $parent => $child) {
 	       } else
 	       
 	       if ( $key == 'mysql_status') { 
-
 				foreach ($value as $a => $b) {
 	       		  
 	       		    foreach ($b as $c => $d) {
@@ -861,8 +803,105 @@ foreach ($json['mysql']  as $parent => $child) {
 	       
 	       } else
 	       
-	       if ( $key == 'mysql_replication') { 
+	       
+####### schema count update
 
+	   // update schema count
+	   
+	   
+	   if ( $key == 'mysql_schemacount') { 
+				foreach ($value as $a => $b) {
+	       		  
+	       		    foreach ($b as $c => $d) {
+	       		    
+	       		      $schemaCount = $d;
+	       		       
+	       		      $schemacount_update_sql = "UPDATE mysql_instance SET schema_count = ? where id = ?;";
+      				  $schemacount_update = $link->prepare($schemacount_update_sql);
+	   		          $schemacount_update->bind_param('ii', $schemaCount, $instance_id);
+	   				  $schemacount_update->execute();
+	 				  $schemacount_update->free_result();
+	       		    
+	       		    }
+	       		 }
+	       }
+
+
+
+
+#### schema count update end
+else	       
+##### io
+               if ( $key == 'mysql_io_profile') {
+			       foreach ($value as $a => $b) {
+                            foreach ($b as $c => $d) {
+                                
+                                
+                                
+                                $schema_name = $c;
+                                    foreach ($d as $e => $f) {
+                                                if ($e == 'sum_reads')
+                                                        {
+                                                          $sum_reads = $f;
+                                                        } else if ( $e == 'sum_writes')
+                                                        {
+                                                          $sum_writes = $f;
+                                                        } else {}
+                                                        }
+                                                 
+										 //error_log('schema_name: '.$schema_name);
+                                                 //error_log('sum_reads: '.$sum_reads);
+                                                 //error_log('sum_writes: '.$sum_writes);
+					 					
+					 					
+					 					
+					 					$io_select_sql = "select id, `sum_reads`, `sum_writes`, `last_poll_dt` from mysql_fileio where `mysql_instance_id` = ? AND `schema` = ?;";
+					 					
+					 					$io_select = $link->prepare($io_select_sql);
+										$io_select->bind_param('is', $instance_id, $schema_name);
+										$io_select->execute();
+										$result = $io_select->get_result();
+										$io_rows = $result->num_rows;
+										$io_select->free_result();
+					 					
+					 					
+					 					while($row = $result->fetch_assoc()){
+										$current_id = $row['id'];
+										$current_reads = $row['sum_reads'];
+										$current_writes = $row['sum_writes'];
+										$current_poll_dt = $row['last_poll_dt'];
+										}
+					 			
+					 					
+					 					if( $io_rows > 0 ){
+					 					
+					 					      $io_history_insert_sql = "INSERT INTO mysql_fileio_history (mysql_fileio_id, sum_reads, sum_writes, last_poll_dt) VALUES (?, ?, ?, ?)";
+					 					      $io_history_insert = $link->prepare($io_history_insert_sql);
+										      $io_history_insert->bind_param('iiis', $current_id, $current_reads, $current_writes, $current_poll_dt);					 		
+										      $io_history_insert->execute();
+										
+										      $io_history_insert->free_result();					 	
+					 					
+					 					
+					 					}
+					 					
+					 					
+					 					
+					 					$io_insert_sql = "INSERT INTO  mysql_fileio (mysql_instance_id, `schema`, sum_reads, sum_writes, last_poll_dt) VALUES (?,?,?,?,FROM_UNIXTIME(?)) ON DUPLICATE KEY UPDATE sum_reads=?, sum_writes=?, last_poll_dt=FROM_UNIXTIME(?)";	
+										
+						                    #error_log('INSERT INTO mysql_fileio (mysql_instance_id, schema, sum_reads, sum_writes, last_poll_dt) VALUES ('.$instance_id.','.$schema_name.','.$sum_reads.','.$sum_writes.',FROM_UNIXTIME('.$json_poll_time.')) ON DUPLICATE KEY UPDATE sum_reads=$sum_reads, sum_writes='.$sum_writes.', last_poll_dt=FROM_UNIXTIME('.$json_poll_time.')');	
+										$io_insert = $link->prepare($io_insert_sql);
+										$io_insert->bind_param('isiisiis', $instance_id, $schema_name, $sum_reads, $sum_writes, $json_poll_time,$sum_reads,$sum_writes,$json_poll_time);
+										$io_insert->execute();
+										
+										$io_insert->free_result();
+                                                }
+                                        }
+               }
+###### io end
+else
+	       
+	       if ( $key == 'mysql_replication') { 
 				foreach ($value as $a => $b) {
 	       		  
 	       		    foreach ($b as $c => $d) {
@@ -955,13 +994,11 @@ foreach ($json['mysql']  as $parent => $child) {
 			{}
 	       
 	   }
-
 	}
 }
-
-
 mysqli_close($link);
 
+//error_log($posthost . ': Done');
 echo "done";
-
+# error_log('done');
 ?>

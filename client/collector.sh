@@ -142,6 +142,16 @@ for i in `netstat -ln | awk '/mysql(.*)?\.sock/ { print $9 }' | sort`;
     echo "" >>  "$hostname.json"
     echo "\"$COUNTER\": {" >> "$hostname.json"
  
+
+    echo "\"mysql_schemacount\": [" >> "$hostname.json"
+    echo "{" >> "$hostname.json"
+    # get server variables  
+    $MYSQL_BIN --socket=$i --skip-column-names -s  --execute "select count(schema_name) from information_schema.schemata " | awk '{ print "\"schema_count\": \"" $1 "\"," }' | sed '$ s/.$//'  >> "$hostname.json"
+
+
+    echo "}" >> "$hostname.json"
+    echo "]," >> "$hostname.json"
+
  
     echo "\"mysql_variables\": [" >> "$hostname.json"
     echo "{" >> "$hostname.json"
@@ -161,6 +171,16 @@ for i in `netstat -ln | awk '/mysql(.*)?\.sock/ { print $9 }' | sort`;
     echo "}" >> "$hostname.json"
     echo "]," >> "$hostname.json"
    
+  
+    echo "\"mysql_io_profile\": [" >> "$hostname.json"
+    echo "{" >> "$hostname.json"
+    # get most recently used schemas
+    mysql --socket=$i --skip-column-names -s  --execute "select OBJECT_SCHEMA as schema_name, SUM(COUNT_READ) as sum_reads, SUM(COUNT_WRITE) as sum_writes FROM performance_schema.table_io_waits_summary_by_table GROUP BY 1 HAVING schema_name  != 'mysql' AND schema_name  != 'english' AND schema_name  != 'performance_schema' AND schema_name  != 'information_schema' AND schema_name  != 'test' AND schema_name  != 'english' AND schema_name  != 'charsets' AND ( SUM(COUNT_READ) > 0 OR  SUM(COUNT_WRITE) > 0 )" | awk '{ print "\""$1"\":{\"sum_reads\":\""$2"\",\"sum_writes\":\""$3"\"},"}' | sed '$ s/.$//' >> "$hostname.json"
+
+    echo "}" >> "$hostname.json"
+    echo "]," >> "$hostname.json"
+
+
     echo "\"mysql_replication\": [" >> "$hostname.json"
     echo "{" >> "$hostname.json"
     
@@ -168,7 +188,10 @@ for i in `netstat -ln | awk '/mysql(.*)?\.sock/ { print $9 }' | sort`;
     
     echo "}" >> "$hostname.json"
     echo "]" >> "$hostname.json"
-    
+
+    #truncate table    
+     mysql --socket=$i  --execute "TRUNCATE TABLE performance_schema.table_io_waits_summary_by_table;"
+ 
     COUNTER=$[COUNTER + 1]
 
 done
