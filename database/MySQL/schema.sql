@@ -16,12 +16,12 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Current Database: `inventory`
+-- Current Database: `yamsdb`
 --
 
-CREATE DATABASE /*!32312 IF NOT EXISTS*/ `inventory` /*!40100 DEFAULT CHARACTER SET latin1 */;
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `yamsdb` /*!40100 DEFAULT CHARACTER SET utf8 */;
 
-USE `inventory`;
+USE `yamsdb`;
 
 --
 -- Table structure for table `datacenter`
