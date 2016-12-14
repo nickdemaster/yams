@@ -34,7 +34,7 @@ CREATE TABLE `datacenter` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -66,7 +66,7 @@ CREATE TABLE `host` (
   `process_dt` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=315 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -82,7 +82,7 @@ CREATE TABLE `host_class` (
   `create_dt` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `modified_dt` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -104,7 +104,7 @@ CREATE TABLE `host_disk` (
   PRIMARY KEY (`id`),
   KEY `fk_host_id_idx` (`host_id`),
   CONSTRAINT `fk_host_id` FOREIGN KEY (`host_id`) REFERENCES `host` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4348 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -127,7 +127,7 @@ CREATE TABLE `host_disk_history` (
   KEY `fk_host_id_idx` (`host_id`),
   KEY `fk_host_diskhistory_idx` (`host_id`),
   CONSTRAINT `fk_host_diskhistory_id` FOREIGN KEY (`host_id`) REFERENCES `host` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=903907 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -158,7 +158,7 @@ CREATE TABLE `host_history` (
   PRIMARY KEY (`id`),
   KEY `fk_host_history_id_idx` (`host_id`),
   CONSTRAINT `fk_host_history_id` FOREIGN KEY (`host_id`) REFERENCES `host` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -181,7 +181,7 @@ CREATE TABLE `host_memory` (
   PRIMARY KEY (`id`),
   KEY `fk_host_memory_id_idx` (`host_id`),
   CONSTRAINT `fk_host_memory_id` FOREIGN KEY (`host_id`) REFERENCES `host` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=282 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -204,7 +204,7 @@ CREATE TABLE `host_memory_history` (
   PRIMARY KEY (`id`),
   KEY `fk_host_memory_history_id_idx` (`host_id`),
   CONSTRAINT `fk_host_memory_history_id` FOREIGN KEY (`host_id`) REFERENCES `host` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=64769 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -229,7 +229,7 @@ CREATE TABLE `host_memory_module` (
   PRIMARY KEY (`id`),
   KEY `fk_host_memmod_id_idx` (`host_id`),
   CONSTRAINT `fk_host_memmod_id` FOREIGN KEY (`host_id`) REFERENCES `host` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1229 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -276,7 +276,7 @@ CREATE TABLE `host_network` (
   PRIMARY KEY (`id`),
   KEY `fk_host_network_id_idx` (`host_id`),
   CONSTRAINT `fk_host_network_id` FOREIGN KEY (`host_id`) REFERENCES `host` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1480 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -298,7 +298,7 @@ CREATE TABLE `host_network_history` (
   PRIMARY KEY (`id`),
   KEY `fk_host_networkhist_id_idx` (`host_id`),
   CONSTRAINT `fk_host_networkhist_id` FOREIGN KEY (`host_id`) REFERENCES `host` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=201 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -321,7 +321,7 @@ CREATE TABLE `mysql_fileio` (
   `last_poll_dt` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_instid_schema` (`mysql_instance_id`,`schema`)
-) ENGINE=InnoDB AUTO_INCREMENT=29709805 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -343,7 +343,7 @@ CREATE TABLE `mysql_fileio_history` (
   `last_poll_dt` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_fileio_history_lpdt` (`last_poll_dt`)
-) ENGINE=InnoDB AUTO_INCREMENT=27808624 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -366,7 +366,7 @@ CREATE TABLE `mysql_instance` (
   PRIMARY KEY (`id`),
   KEY `fk_host_mysql_instance_id_idx` (`host_id`),
   CONSTRAINT `fk_host_mysql_instance_id` FOREIGN KEY (`host_id`) REFERENCES `host` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1266 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -387,7 +387,7 @@ CREATE TABLE `mysql_replication` (
   PRIMARY KEY (`id`),
   KEY `fk_instance_replication_id_idx` (`instance_id`),
   CONSTRAINT `fk_instance_replication_id` FOREIGN KEY (`instance_id`) REFERENCES `mysql_instance` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=10560 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -408,7 +408,7 @@ CREATE TABLE `mysql_replication_history` (
   PRIMARY KEY (`id`),
   KEY `fk_mysql_repl_id_idx` (`mysql_replication_id`),
   CONSTRAINT `fk_mysql_repl_id` FOREIGN KEY (`mysql_replication_id`) REFERENCES `mysql_replication` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1314 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -429,7 +429,7 @@ CREATE TABLE `mysql_status` (
   PRIMARY KEY (`id`),
   KEY `fk_mysql_status_id_idx` (`instance_id`),
   CONSTRAINT `fk_mysql_status_id` FOREIGN KEY (`instance_id`) REFERENCES `mysql_instance` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=479738 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -450,7 +450,7 @@ CREATE TABLE `mysql_status_history` (
   PRIMARY KEY (`id`),
   KEY `fk_mysql_status_id2_idx` (`mysql_status_id`),
   CONSTRAINT `fk_mysql_status_id2` FOREIGN KEY (`mysql_status_id`) REFERENCES `mysql_status` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=26048523 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -471,7 +471,7 @@ CREATE TABLE `mysql_variables` (
   PRIMARY KEY (`id`),
   KEY `fk_mysql_variables_id_idx` (`instance_id`),
   CONSTRAINT `fk_mysql_variables_id` FOREIGN KEY (`instance_id`) REFERENCES `mysql_instance` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=538841 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -492,7 +492,7 @@ CREATE TABLE `mysql_variables_history` (
   PRIMARY KEY (`id`),
   KEY `fk_mysql_var_id_idx` (`mysql_variables_id`),
   CONSTRAINT `fk_mysql_var_id` FOREIGN KEY (`mysql_variables_id`) REFERENCES `mysql_variables` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4185 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
