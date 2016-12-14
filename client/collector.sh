@@ -93,7 +93,8 @@ echo "}," >> "$hostname.json"
 # get memory
 echo "\"memory_usage\": {" >> "$hostname.json"
 if hash free 2>/dev/null; then
-free -m | grep Mem | awk '{ print "\"used\": \"" $3 "\",\n" "\"total\": \"" $2 "\"" }' >> "$hostname.json"
+free -m | grep Mem | awk '{ print "\"used\": \"" $3 "\",\n" "\"total\": \"" $2 "\",\n\"buffers_used\": \""$3-$6-$7"\",\n\"total_free\": \""$2-($3-$6-$7)"\"" }' >> "$hostname.json"
+#free -m | grep Mem | awk '{ print "\"used\": \"" $3 "\",\n" "\"total\": \"" $2 "\"" }' >> "$hostname.json"
 fi
 echo "}," >> "$hostname.json"
 
@@ -134,6 +135,9 @@ echo "{" >> "$hostname.json"
 for i in `netstat -ln | awk '/mysql(.*)?\.sock/ { print $9 }' | sort`; 
   do
  
+
+   mysqldatadir=$( $MYSQL_BIN --socket=$i --skip-column-names -s  --execute "SHOW VARIABLES LIKE 'datadir'" | awk '{print $2}');
+
     if [ $COUNTER -gt 0 ];  then 
       echo "}," >> "$hostname.json"
     fi
@@ -175,7 +179,27 @@ for i in `netstat -ln | awk '/mysql(.*)?\.sock/ { print $9 }' | sort`;
     echo "\"mysql_io_profile\": [" >> "$hostname.json"
     echo "{" >> "$hostname.json"
     # get most recently used schemas
-    mysql --socket=$i --skip-column-names -s  --execute "select OBJECT_SCHEMA as schema_name, SUM(COUNT_READ) as sum_reads, SUM(COUNT_WRITE) as sum_writes FROM performance_schema.table_io_waits_summary_by_table GROUP BY 1 HAVING schema_name  != 'mysql' AND schema_name  != 'english' AND schema_name  != 'performance_schema' AND schema_name  != 'information_schema' AND schema_name  != 'test' AND schema_name  != 'english' AND schema_name  != 'charsets' AND ( SUM(COUNT_READ) > 0 OR  SUM(COUNT_WRITE) > 0 )" | awk '{ print "\""$1"\":{\"sum_reads\":\""$2"\",\"sum_writes\":\""$3"\"},"}' | sed '$ s/.$//' >> "$hostname.json"
+
+ for j in `mysql --socket=$i --skip-column-names -s  --execute "SELECT OBJECT_SCHEMA AS schema_name FROM performance_schema.table_io_waits_summary_by_table GROUP BY 1 HAVING schema_name != 'mysql' AND schema_name != 'english' AND schema_name != 'performance_schema' AND schema_name != 'information_schema' AND schema_name != 'test' AND schema_name != 'english' AND schema_name != 'charsets' AND (SUM(COUNT_READ) > 0 OR SUM(COUNT_WRITE) > 0)"`; 
+       do 
+          innodbtables=$(ls $mysqldatadir$j | grep -i .ibd | wc -l);
+          myisamtables=$(ls $mysqldatadir$j | grep -i .myd | wc -l);
+          dirsize=$(du $mysqldatadir$j -b | awk '{print $1}');
+         
+          sumarray=($($MYSQL_BIN --socket=$i --skip-column-names -s  --execute="SELECT SUM(ps.COUNT_READ) AS sum_reads, SUM(ps.COUNT_WRITE) AS sum_writes  FROM performance_schema.table_io_waits_summary_by_table ps WHERE ps.OBJECT_SCHEMA = '$j' GROUP BY ps.OBJECT_SCHEMA"));
+ 
+        
+          sum_reads=$(echo ${sumarray[0]});
+          sum_writes=$(echo ${sumarray[1]});
+
+          #sum_reads=$($MYSQL_BIN --socket=$i --skip-column-names -s  --execute="SELECT SUM(ps.COUNT_READ) AS sum_reads FROM performance_schema.table_io_waits_summary_by_table ps WHERE ps.OBJECT_SCHEMA = '$j' GROUP BY ps.OBJECT_SCHEMA");
+          #sum_writes=$($MYSQL_BIN --socket=$i --skip-column-names -s  --execute="SELECT SUM(ps.COUNT_WRITE) AS sum_writes FROM performance_schema.table_io_waits_summary_by_table ps WHERE ps.OBJECT_SCHEMA = '$j' GROUP BY ps.OBJECT_SCHEMA");
+          
+         echo "\"$j\":{ \"total_tables\": \"$(($innodbtables+$myisamtables))\", \"myisam_tables\": \"$myisamtables\", \"size\": \"$dirsize\", \"sum_reads\": \"$sum_reads\", \"sum_writes\": \"$sum_writes\" }," >> "$hostname.json"
+
+done
+  
+    echo "\"yamsfiller\": {\"total_tables\":\"0\",\"myisam_tables\":\"0\",\"size\":\"0\",\"sum_reads\":\"0\",\"sum_writes\":\"0\"}"  >> "$hostname.json"
 
     echo "}" >> "$hostname.json"
     echo "]," >> "$hostname.json"
@@ -190,7 +214,7 @@ for i in `netstat -ln | awk '/mysql(.*)?\.sock/ { print $9 }' | sort`;
     echo "]" >> "$hostname.json"
 
     #truncate table    
-     mysql --socket=$i  --execute "TRUNCATE TABLE performance_schema.table_io_waits_summary_by_table;"
+    mysql --socket=$i  --execute "TRUNCATE TABLE performance_schema.table_io_waits_summary_by_table;"
  
     COUNTER=$[COUNTER + 1]
 
