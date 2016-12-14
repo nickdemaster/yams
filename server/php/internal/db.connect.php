@@ -19,7 +19,7 @@ $apikey="";
 $hostname = "";
 $username = "";
 $password = "";
-$schema = "yams";
+$schema = "yamsdb";
 $port = "3306";
 
 
