@@ -178,24 +178,16 @@ for i in `netstat -ln | awk '/mysql(.*)?\.sock/ { print $9 }' | sort`;
   
     echo "\"mysql_io_profile\": [" >> "$hostname.json"
     echo "{" >> "$hostname.json"
+
     # get most recently used schemas
-
- for j in `mysql --socket=$i --skip-column-names -s  --execute "SELECT OBJECT_SCHEMA AS schema_name FROM performance_schema.table_io_waits_summary_by_table GROUP BY 1 HAVING schema_name != 'mysql' AND schema_name != 'english' AND schema_name != 'performance_schema' AND schema_name != 'information_schema' AND schema_name != 'test' AND schema_name != 'english' AND schema_name != 'charsets' AND (SUM(COUNT_READ) > 0 OR SUM(COUNT_WRITE) > 0)"`; 
+    
+	mysql --socket=$i --skip-column-names -s  --execute "SELECT OBJECT_SCHEMA AS schema_name, SUM(COUNT_READ) as sum_reads, SUM(COUNT_WRITE) as sum_writes FROM performance_schema.table_io_waits_summary_by_table GROUP BY 1 HAVING schema_name != 'mysql' AND schema_name != 'english' AND schema_name != 'performance_schema' AND schema_name != 'information_schema' AND schema_name != 'test' AND schema_name != 'english' AND schema_name != 'charsets' AND (SUM(COUNT_READ) > 0 OR SUM(COUNT_WRITE) > 0)" | while read schema_name sum_reads sum_writes;
        do 
-          innodbtables=$(ls $mysqldatadir$j | grep -i .ibd | wc -l);
-          myisamtables=$(ls $mysqldatadir$j | grep -i .myd | wc -l);
-          dirsize=$(du $mysqldatadir$j -b | awk '{print $1}');
-         
-          sumarray=($($MYSQL_BIN --socket=$i --skip-column-names -s  --execute="SELECT SUM(ps.COUNT_READ) AS sum_reads, SUM(ps.COUNT_WRITE) AS sum_writes  FROM performance_schema.table_io_waits_summary_by_table ps WHERE ps.OBJECT_SCHEMA = '$j' GROUP BY ps.OBJECT_SCHEMA"));
- 
-        
-          sum_reads=$(echo ${sumarray[0]});
-          sum_writes=$(echo ${sumarray[1]});
-
-          #sum_reads=$($MYSQL_BIN --socket=$i --skip-column-names -s  --execute="SELECT SUM(ps.COUNT_READ) AS sum_reads FROM performance_schema.table_io_waits_summary_by_table ps WHERE ps.OBJECT_SCHEMA = '$j' GROUP BY ps.OBJECT_SCHEMA");
-          #sum_writes=$($MYSQL_BIN --socket=$i --skip-column-names -s  --execute="SELECT SUM(ps.COUNT_WRITE) AS sum_writes FROM performance_schema.table_io_waits_summary_by_table ps WHERE ps.OBJECT_SCHEMA = '$j' GROUP BY ps.OBJECT_SCHEMA");
-          
-         echo "\"$j\":{ \"total_tables\": \"$(($innodbtables+$myisamtables))\", \"myisam_tables\": \"$myisamtables\", \"size\": \"$dirsize\", \"sum_reads\": \"$sum_reads\", \"sum_writes\": \"$sum_writes\" }," >> "$hostname.json"
+          innodbtables=$(ls $mysqldatadir$schema_name | grep -i .ibd | wc -l);
+          myisamtables=$(ls $mysqldatadir$schema_name | grep -i .myd | wc -l);
+          dirsize=$(du $mysqldatadir$schema_name -b | awk '{print $1}');
+           
+         echo "\"$schema_name\":{ \"total_tables\": \"$(($innodbtables+$myisamtables))\", \"myisam_tables\": \"$myisamtables\", \"size\": \"$dirsize\", \"sum_reads\": \"$sum_reads\", \"sum_writes\": \"$sum_writes\" }," >> "$hostname.json"
 
 done
   
