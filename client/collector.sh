@@ -15,7 +15,7 @@
 hostname="/tmp/"`hostname`
 base64host=$(echo `hostname` | base64)
 datacener="[string]"
-apikey="[generate own API Key]"
+apikey="[generate own API Key - must match with what the consume.php requires]"
 consumerAddress="https://[ipaddress:port]/consume.php"
 
 MYSQL_BIN=`which mysql`
@@ -189,7 +189,7 @@ for i in `netstat -ln | awk '/mysql(.*)?\.sock/ { print $9 }' | sort`;
            
          echo "\"$schema_name\":{ \"total_tables\": \"$(($innodbtables+$myisamtables))\", \"myisam_tables\": \"$myisamtables\", \"size\": \"$dirsize\", \"sum_reads\": \"$sum_reads\", \"sum_writes\": \"$sum_writes\" }," >> "$hostname.json"
 
-done
+	  done
   
     echo "\"yamsfiller\": {\"total_tables\":\"0\",\"myisam_tables\":\"0\",\"size\":\"0\",\"sum_reads\":\"0\",\"sum_writes\":\"0\"}"  >> "$hostname.json"
 
